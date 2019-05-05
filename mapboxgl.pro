@@ -1,5 +1,29 @@
 TARGET = qtgeoservices_mapboxgl
 
+# Configure platform
+macx {
+    QT_PLATFORM = clang_64
+} else:ios {
+    QT_PLATFORM = ios
+} else:android {
+    QMAKE_QMAKE_SPLIT = $$split(QMAKE_QMAKE, /)
+    QMAKE_QMAKE_ANDROID = $$find(QMAKE_QMAKE_SPLIT, android)
+
+    equals(QMAKE_QMAKE_ANDROID, android_arm64_v8a) {
+        QT_PLATFORM = android_arm64_v8a
+    } else:equals(QMAKE_QMAKE_ANDROID, android_armv7) {
+        QT_PLATFORM = android_armv7
+    } else:equals(QMAKE_QMAKE_ANDROID, android_x86) {
+        QT_PLATFORM = android_x86
+    } else {
+        error("Unknown platform!")
+    }
+} else {
+    error("Unknown platform!")
+}
+
+message("Platform: $$QT_PLATFORM")
+
 QT += \
     quick-private \
     location-private \
@@ -32,12 +56,13 @@ RESOURCES += mapboxgl.qrc
 OTHER_FILES += \
     mapboxgl_plugin.json
 
-INCLUDEPATH += ../../../3rdparty/mapbox-gl-native/platform/qt/include
+INCLUDEPATH += mapbox-gl-native/include
 
-include(../../../3rdparty/zlib_dependency.pri)
+include(zlib_dependency.pri)
 
 load(qt_build_paths)
-LIBS_PRIVATE += -L$$MODULE_BASE_OUTDIR/lib -lqmapboxgl$$qtPlatformTargetSuffix()
+
+LIBS_PRIVATE += -L$$top_srcdir/mapbox-gl-native/lib/$$QT_PLATFORM -lqmapboxgl$$qtPlatformTargetSuffix()
 
 qtConfig(icu) {
     QMAKE_USE_PRIVATE += icu
