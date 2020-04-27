@@ -6,18 +6,7 @@ macx {
 } else:ios {
     QT_PLATFORM = ios
 } else:android {
-    QMAKE_QMAKE_SPLIT = $$split(QMAKE_QMAKE, /)
-    QMAKE_QMAKE_ANDROID = $$find(QMAKE_QMAKE_SPLIT, android)
-
-    equals(QMAKE_QMAKE_ANDROID, android_arm64_v8a) {
-        QT_PLATFORM = android_arm64_v8a
-    } else:equals(QMAKE_QMAKE_ANDROID, android_armv7) {
-        QT_PLATFORM = android_armv7
-    } else:equals(QMAKE_QMAKE_ANDROID, android_x86) {
-        QT_PLATFORM = android_x86
-    } else {
-        error("Unknown platform!")
-    }
+    QT_PLATFORM = android
 } else {
     error("Unknown platform!")
 }
