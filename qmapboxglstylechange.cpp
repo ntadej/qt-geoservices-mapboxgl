@@ -255,6 +255,35 @@ QList<QSharedPointer<QMapboxGLStyleChange>> QMapboxGLStyleChange::addMapItem(QDe
     return changes;
 }
 
+QList<QSharedPointer<QMapboxGLStyleChange>> QMapboxGLStyleChange::removeMapParameter(QGeoMapParameter *param)
+{
+    static const QStringList acceptedParameterTypes = QStringList()
+        << QStringLiteral("paint") << QStringLiteral("layout") << QStringLiteral("filter")
+        << QStringLiteral("layer") << QStringLiteral("source") << QStringLiteral("image");
+
+    QList<QSharedPointer<QMapboxGLStyleChange>> changes;
+
+    switch (acceptedParameterTypes.indexOf(param->type())) {
+    case -1:
+        qWarning() << "Invalid value for property 'type': " + param->type();
+        break;
+    case 0: // paint
+    case 1: // layout
+    case 2: // filter
+        break;
+    case 3: // layer
+        changes << QSharedPointer<QMapboxGLStyleChange>(new QMapboxGLStyleRemoveLayer(param->property("name").toString()));
+        break;
+    case 4: // source
+        changes << QSharedPointer<QMapboxGLStyleChange>(new QMapboxGLStyleRemoveSource(param->property("name").toString()));
+        break;
+    case 5: // image
+        break;
+    }
+
+    return changes;
+}
+
 QList<QSharedPointer<QMapboxGLStyleChange>> QMapboxGLStyleChange::removeMapItem(QDeclarativeGeoMapItemBase *item)
 {
     QList<QSharedPointer<QMapboxGLStyleChange>> changes;
@@ -568,7 +597,15 @@ QSharedPointer<QMapboxGLStyleChange> QMapboxGLStyleAddSource::fromMapParameter(Q
     case 0: // vector
     case 1: // raster
     case 2: // raster-dem
-        source->m_params[QStringLiteral("url")] = param->property("url");
+        if (param->hasProperty("url")) {
+            source->m_params[QStringLiteral("url")] = param->property("url");
+        }
+        if (param->hasProperty("tiles")) {
+            source->m_params[QStringLiteral("tiles")] = param->property("tiles");
+        }
+        if (param->hasProperty("tileSize")) {
+            source->m_params[QStringLiteral("tileSize")] = param->property("tileSize");
+        }
         break;
     case 3: { // geojson
         auto data = param->property("data").toString();
