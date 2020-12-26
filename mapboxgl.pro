@@ -11,6 +11,9 @@ macx {
     error("Unknown platform!")
 }
 
+QMAKE_CFLAGS += -Werror
+QMAKE_CXXFLAGS += -Werror
+
 message("Platform: $$QT_PLATFORM")
 
 QT += \
